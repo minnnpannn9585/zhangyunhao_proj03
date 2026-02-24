@@ -8,4 +8,5 @@ public class FoodData : ScriptableObject
     public int baseScore;            // 基础分值
     public float bestCookedRate;     // 最佳熟度（0-100）
     public float scoreWeight;        // 熟度得分权重
+    public int spawnWeight;
 }

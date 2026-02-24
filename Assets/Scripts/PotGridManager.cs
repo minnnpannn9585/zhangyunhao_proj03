@@ -16,7 +16,7 @@ public class PotGridManager : MonoBehaviour
     [Header("食物配置")]
     public List<FoodMatch> foodMatches; // 食物搭配列表
     public FoodBlock foodPrefab;       // 食物预制体
-    public List<FoodSpawnConfig> spawnConfigs; // 食物生成配置（带权重）
+    public List<FoodData> spawnData; // 食物生成配置（带权重）
     public float spawnInterval = 2f;   // 食物生成间隔（秒）
     public float fallSpeed = 1f;       // 食物下落速度（秒/格）
 
@@ -108,7 +108,7 @@ public class PotGridManager : MonoBehaviour
     private void CalculateTotalSpawnWeight()
     {
         totalSpawnWeight = 0;
-        foreach (var config in spawnConfigs)
+        foreach (var config in spawnData)
         {
             totalSpawnWeight += config.spawnWeight;
         }
@@ -117,7 +117,7 @@ public class PotGridManager : MonoBehaviour
     // 随机选择一种食物（按权重）
     private FoodData GetRandomFood()
     {
-        if (spawnConfigs.Count == 0 || totalSpawnWeight == 0)
+        if (spawnData.Count == 0 || totalSpawnWeight == 0)
         {
             Debug.LogWarning("没有配置食物生成列表！");
             return null;
@@ -126,17 +126,17 @@ public class PotGridManager : MonoBehaviour
         int randomValue = Random.Range(0, totalSpawnWeight);
         int currentWeight = 0;
 
-        foreach (var config in spawnConfigs)
+        foreach (var config in spawnData)
         {
             currentWeight += config.spawnWeight;
             if (randomValue < currentWeight)
             {
-                return config.foodData;
+                return config;
             }
         }
 
         // 兜底返回第一个
-        return spawnConfigs[0].foodData;
+        return spawnData[0];
     }
 
     // 随机生成食物（在顶部随机列）
@@ -152,12 +152,15 @@ public class PotGridManager : MonoBehaviour
             PotGridCell targetCell = gridCells[(int)spawnGridPos.x, (int)spawnGridPos.y];
             if (targetCell.IsEmpty())
             {
+                
                 // 3. 随机选择食物类型
                 FoodData randomFood = GetRandomFood();
                 if (randomFood != null)
                 {
+                    
                     // 4. 生成食物并加入下落列表
                     FoodBlock newFood = Instantiate(foodPrefab, targetCell.transform.position, Quaternion.identity);
+                    newFood.sr.sprite = randomFood.foodSprite;
                     newFood.foodData = randomFood;
                     newFood.currentCookedRate = 0;
                     newFood.fallTimer = 0f; // 初始化下落计时器
