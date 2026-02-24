@@ -14,7 +14,7 @@ public class FoodBlock : MonoBehaviour
     [Header("下落属性")]
     public float fallTimer;          // 下落计时器（新增）
 
-    private SpriteRenderer sr;       // 食物渲染器
+    public SpriteRenderer sr;       // 食物渲染器
     private Collider2D col;          // 碰撞体
     private bool isPickable = true;  // 是否可拾取
 
