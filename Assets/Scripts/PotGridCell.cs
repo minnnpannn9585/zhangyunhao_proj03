@@ -30,27 +30,11 @@ public class PotGridCell : MonoBehaviour
     {
         currentFood = null;
     }
-
-    // 每帧更新烹饪逻辑
-    private void Update()
-    {
-        if (currentFood != null && !currentFood.IsMatched)
-        {
-            currentFood.UpdateCookedRate(cookSpeed * Time.deltaTime);
-        }
-    }
+    
 
     // 获取当前格子的食物
     public FoodBlock GetCurrentFood() => currentFood;
 
-    // 检测点击（可挂载Collider2D，通过射线检测触发）
-    public void OnCellClicked()
-    {
-        if (currentFood != null)
-        {
-            currentFood.OnFoodClicked();
-        }
-    }
 
     // 格子是否为空
     public bool IsEmpty() => currentFood == null;

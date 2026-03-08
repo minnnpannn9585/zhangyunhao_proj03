@@ -1,22 +1,22 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class FoodBlock : MonoBehaviour
 {
     [Header("食物基础属性")]
     public FoodData foodData;        // 食物数据配置
     public float currentCookedRate;  // 当前熟度（0-100）
-    public bool isMatched = false;   // 是否是已合成的搭配物
-    public FoodBlock matchedPartner; // 搭配的伙伴（合成前）
     public PotGridCell currentCell;  // 当前所在的网格单元格
 
-    [Header("下落属性")]
-    public float fallTimer;          // 下落计时器（新增）
-
-    public SpriteRenderer sr;       // 食物渲染器
+    private SpriteRenderer sr;       // 食物渲染器
     private Collider2D col;          // 碰撞体
-    private bool isPickable = true;  // 是否可拾取
+
+    [Header("成熟度属性")]
+    public int maturity; // 当前成熟度（0-10）
+    public float maturityTimer; // 成熟度计时器
+    public float maturityIncreaseInterval = 1f; // 每次成熟度增加的时间间隔
+
+    public float fallTimer; // 用于控制食物下落的计时器
 
     private void Awake()
     {
@@ -28,94 +28,58 @@ public class FoodBlock : MonoBehaviour
         }
     }
 
-    // 更新熟度（保留原有逻辑）
-    public void UpdateCookedRate(float cookDelta)
+    private void Update()
     {
-        if (isMatched) return;
-        currentCookedRate = Mathf.Clamp(currentCookedRate + cookDelta * 10, 0, 100);
+        // 确保食物落地后才更新成熟度
+        if (CanIncreaseMaturity())
+        {
+            maturityTimer += Time.deltaTime;
+            if (maturityTimer >= maturityIncreaseInterval && maturity < 10)
+            {
+                maturity++;
+                maturityTimer = 0f;
+                GameUIManager.Instance.UpdateFoodInfo(); // 更新场上食物信息
+            }
+        }
     }
 
-    // 食物被点击时的逻辑（修改：拾取时移除下落状态）
+    private bool CanIncreaseMaturity()
+    {
+        return currentCell != null && !PotGridManager.Instance.fallingFoods.Contains(this);
+    }
+
+    public void MoveHorizontal(int direction)
+    {
+        if (currentCell == null) return;
+
+        // 计算目标格子位置
+        Vector2 targetGridPos = new Vector2(currentCell.gridPos.x + direction, currentCell.gridPos.y);
+
+        // 检测目标格子是否有效且为空
+        if (PotGridManager.Instance.IsValidGridPos(targetGridPos))
+        {
+            PotGridCell targetCell = PotGridManager.Instance.GetCellAtPosition(targetGridPos);
+            if (targetCell != null && targetCell.IsEmpty())
+            {
+                // 移动到目标格子
+                currentCell.RemoveFood();
+                targetCell.SetFood(this);
+            }
+        }
+    }
+
     public void OnFoodClicked()
     {
-        if (!isPickable) return;
-
-        if (isMatched)
-        {
-            HarvestMatchedFood();
-        }
-        else
-        {
-            FoodBlock matchFood = CheckAdjacentMatch();
-            if (matchFood != null)
-            {
-                CreateFoodMatch(matchFood);
-            }
-            else
-            {
-                // 拾取单个食物时，移除下落状态
-                PotGridManager.Instance.RemoveFromFallingList(this);
-                HarvestSingleFood();
-            }
-        }
-    }
-
-    // 检测相邻可搭配的食物（保留原有逻辑）
-    private FoodBlock CheckAdjacentMatch()
-    {
-        PotGridManager gridManager = PotGridManager.Instance;
-        if (gridManager == null) return null;
-
-        List<PotGridCell> adjacentCells = gridManager.GetAdjacentCells(currentCell.gridPos);
-        foreach (var cell in adjacentCells)
-        {
-            FoodBlock adjacentFood = cell.GetCurrentFood();
-            if (adjacentFood != null && !adjacentFood.isMatched)
-            {
-                FoodMatch match = gridManager.CheckFoodMatch(foodData, adjacentFood.foodData);
-                if (match != null)
-                {
-                    return adjacentFood;
-                }
-            }
-        }
-        return null;
-    }
-
-    // 创建食物搭配（保留原有逻辑）
-    private void CreateFoodMatch(FoodBlock partner)
-    {
-        PotGridManager.Instance.CreateMatch(this, partner, currentCell.gridPos);
-        matchedPartner = partner;
-    }
-
-    // 收获单个食物（保留原有逻辑）
-    private void HarvestSingleFood()
-    {
-        float rateDiff = Mathf.Abs(currentCookedRate - foodData.bestCookedRate);
-        float scoreRatio = Mathf.Clamp01(1 - rateDiff / 100);
-        int finalScore = Mathf.RoundToInt(foodData.baseScore * scoreRatio * foodData.scoreWeight);
-
-        ScoreManager.Instance.AddScore(finalScore);
+        if (currentCell == null) return;
+        
+        
+        GameUIManager.Instance.AddScore(maturity);
 
         currentCell.RemoveFood();
         Destroy(gameObject);
+        GameUIManager.Instance.UpdateFoodInfo();
     }
+    
 
-    // 收获搭配食物（保留原有逻辑）
-    private void HarvestMatchedFood()
-    {
-        FoodMatch match = PotGridManager.Instance.CheckFoodMatch(foodData, matchedPartner.foodData);
-        int matchScore = match != null ? match.matchScore : 0;
-
-        ScoreManager.Instance.AddScore(matchScore);
-
-        currentCell.RemoveFood();
-        Destroy(matchedPartner.gameObject);
-        Destroy(gameObject);
-    }
-
-    // 外部访问的属性（保留）
-    public bool IsMatched { get => isMatched; set => isMatched = value; }
     public PotGridCell CurrentCell { get => currentCell; set => currentCell = value; }
 }
