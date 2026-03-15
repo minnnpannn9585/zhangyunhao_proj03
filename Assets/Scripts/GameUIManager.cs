@@ -25,6 +25,7 @@ public class GameUIManager : MonoBehaviour
 
     public void AddScore(int score)
     {
+        print(score);
         totalScore += score;
         UpdateScoreText();
     }
@@ -41,7 +42,7 @@ public class GameUIManager : MonoBehaviour
         StringBuilder sb = new StringBuilder();
         foreach (var food in FindObjectsOfType<FoodBlock>())
         {
-            sb.AppendLine($"{food.foodData.foodName}: maturity {food.maturity}");
+            sb.AppendLine($"{food.foodData.foodName}: Cooked Rate {food.currentCookedRate}");
         }
         foodInfoText.text = sb.ToString();
     }

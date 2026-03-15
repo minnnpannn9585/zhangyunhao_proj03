@@ -12,9 +12,8 @@ public class FoodBlock : MonoBehaviour
     private Collider2D col;          // 碰撞体
 
     [Header("成熟度属性")]
-    public int maturity; // 当前成熟度（0-10）
     public float maturityTimer; // 成熟度计时器
-    public float maturityIncreaseInterval = 1f; // 每次成熟度增加的时间间隔
+    public float maturityIncreaseInterval = 0.1f; // 每次成熟度增加的时间间隔
 
     public float fallTimer; // 用于控制食物下落的计时器
 
@@ -34,9 +33,9 @@ public class FoodBlock : MonoBehaviour
         if (CanIncreaseMaturity())
         {
             maturityTimer += Time.deltaTime;
-            if (maturityTimer >= maturityIncreaseInterval && maturity < 10)
+            if (maturityTimer >= maturityIncreaseInterval)
             {
-                maturity++;
+                currentCookedRate++;
                 maturityTimer = 0f;
                 GameUIManager.Instance.UpdateFoodInfo(); // 更新场上食物信息
             }
@@ -73,13 +72,38 @@ public class FoodBlock : MonoBehaviour
         if (currentCell == null) return;
         
         
-        GameUIManager.Instance.AddScore(maturity);
+        GameUIManager.Instance.AddScore(CalculateScore());
 
         currentCell.RemoveFood();
         Destroy(gameObject);
         GameUIManager.Instance.UpdateFoodInfo();
     }
     
+    private int CalculateScore()
+    {
+        if (currentCookedRate > 100)
+        {
+            return 0; // 超过100分，得分为0
+        }
+        if (currentCookedRate >= 76)
+        {
+            return foodData.stageFourScore; // 阶段四得分
+        }
+        else if (currentCookedRate >= 51)
+        {
+            return foodData.stageThreeScore; // 阶段三得分
+        }
+        else if (currentCookedRate >= 26)
+        {
+            return foodData.stageTwoScore; // 阶段二得分
+        }
+        else if (currentCookedRate >= 1)
+        {
+            return foodData.stageOneScore; // 阶段一得分
+        }
+
+        return 0; // 默认得分
+    }
 
     public PotGridCell CurrentCell { get => currentCell; set => currentCell = value; }
 }

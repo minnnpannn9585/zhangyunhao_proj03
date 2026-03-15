@@ -111,8 +111,10 @@ public class PotGridManager : MonoBehaviour
         }
 
         // 设置食物初始位置
-        Vector2 spawnPosition = gridStartPos + new Vector2(gridWidth / 2 * cellSize, gridHeight * cellSize);
+        int randomX = Random.Range(0, gridWidth);
+        Vector2 spawnPosition = gridStartPos + new Vector2(randomX * cellSize, (gridHeight -1)  * cellSize);
         newFood.transform.position = spawnPosition;
+        gridCells[randomX, gridHeight-1].SetFood(newFood);
 
         // 设置食物为正在下落状态
         newFood.fallTimer = 0f;
@@ -137,7 +139,7 @@ public class PotGridManager : MonoBehaviour
         if (food.fallTimer < fallSpeed) return true;
 
         food.fallTimer = 0f;
-        Vector2 targetGridPos = food.CurrentCell != null ? food.CurrentCell.gridPos + Vector2.down : new Vector2(gridWidth / 2, gridHeight - 1);
+        Vector2 targetGridPos = food.CurrentCell.gridPos + Vector2.down;
 
         if (IsValidGridPos(targetGridPos) && gridCells[(int)targetGridPos.x, (int)targetGridPos.y].IsEmpty())
         {

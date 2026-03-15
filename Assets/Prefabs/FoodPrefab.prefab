@@ -100,14 +100,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foodData: {fileID: 0}
   currentCookedRate: 0
-  isMatched: 0
-  matchedPartner: {fileID: 0}
   currentCell: {fileID: 0}
-  fallTimer: 1
-  sr: {fileID: 0}
   maturity: 0
   maturityTimer: 0
-  maturityIncreaseInterval: 1
+  maturityIncreaseInterval: 0.1
+  fallTimer: 1
 --- !u!61 &2818223667224482914
 BoxCollider2D:
   m_ObjectHideFlags: 0

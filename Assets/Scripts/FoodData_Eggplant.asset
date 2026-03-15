@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foodName: Eggplant
   foodSprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  baseScore: 1
-  bestCookedRate: 0
-  scoreWeight: 0
-  spawnWeight: 10
+  stageOneScore: 4
+  stageTwoScore: 5
+  stageThreeScore: 6
+  stageFourScore: 2
