@@ -16,7 +16,12 @@ public class FoodBlock : MonoBehaviour
     public float maturityIncreaseInterval = 0.1f; // 每次成熟度增加的时间间隔
 
     public float fallTimer; // 用于控制食物下落的计时器
+        // ...已有字段...
 
+   public bool isBurnt = false; // 是否为焦炭
+   public Sprite burntSprite;   // 焦炭外观（可在Inspector中指定）
+
+        // ...已有代码...
     private void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
@@ -35,7 +40,7 @@ public class FoodBlock : MonoBehaviour
             maturityTimer += Time.deltaTime;
             if (maturityTimer >= maturityIncreaseInterval)
             {
-                currentCookedRate++;
+                currentCookedRate += currentCell.cookSpeed;
                 maturityTimer = 0f;
                 GameUIManager.Instance.UpdateFoodInfo(); // 更新场上食物信息
             }
@@ -65,6 +70,7 @@ public class FoodBlock : MonoBehaviour
                 targetCell.SetFood(this);
             }
         }
+   
     }
 
     public void OnFoodClicked()
@@ -81,9 +87,10 @@ public class FoodBlock : MonoBehaviour
     
     private int CalculateScore()
     {
-        if (currentCookedRate > 100)
+        if (currentCookedRate > 100)// 超过100分，得分为0,并且变成焦炭
         {
-            return 0; // 超过100分，得分为0
+            BecomeBurnt();
+            return 0;
         }
         if (currentCookedRate >= 76)
         {
@@ -104,6 +111,14 @@ public class FoodBlock : MonoBehaviour
 
         return 0; // 默认得分
     }
-
+    private void BecomeBurnt()
+    {
+        isBurnt = true;
+        currentCookedRate = -10000; // 可选，标记为焦炭
+        if (burntSprite != null)
+        {
+            sr.sprite = burntSprite;
+        }
+    }
     public PotGridCell CurrentCell { get => currentCell; set => currentCell = value; }
 }

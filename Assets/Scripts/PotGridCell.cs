@@ -3,7 +3,8 @@
 public class PotGridCell : MonoBehaviour
 {
     [Header("烹饪属性")]
-    public float cookSpeed = 1f;     // 该格子的烹饪速度
+    public float cookSpeed = 2f;
+                                        // 该格子的烹饪速度
     public Vector2 gridPos;          // 格子在网格中的坐标（x,y）
 
     private FoodBlock currentFood;   // 当前格子中的食物
@@ -25,10 +26,13 @@ public class PotGridCell : MonoBehaviour
         }
     }
 
-    // 移除格子中的食物
+    
     public void RemoveFood()
     {
-        currentFood = null;
+        if (currentFood.isBurnt == false)
+        {
+            currentFood = null;
+        }
     }
     
 

@@ -87,7 +87,15 @@ public class PotGridManager : MonoBehaviour
                 Vector2 cellWorldPos = gridStartPos + new Vector2(x * cellSize, y * cellSize);
                 PotGridCell cell = Instantiate(cellPrefab, cellWorldPos, Quaternion.identity, transform);
                 cell.gridPos = new Vector2(x, y);
-                gridCells[x, y] = cell;
+                if (x == 0 || x == gridWidth - 1 || y == 0)
+                {
+                    cell.cookSpeed = 2;
+                }
+                else
+                {
+                    cell.cookSpeed = 1;
+                }
+                    gridCells[x, y] = cell;
             }
         }
     }
@@ -143,7 +151,7 @@ public class PotGridManager : MonoBehaviour
 
         if (IsValidGridPos(targetGridPos) && gridCells[(int)targetGridPos.x, (int)targetGridPos.y].IsEmpty())
         {
-            if (food.CurrentCell != null)
+            if (food.CurrentCell != null )
             {
                 food.CurrentCell.RemoveFood();
             }
