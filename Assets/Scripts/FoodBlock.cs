@@ -76,7 +76,7 @@ public class FoodBlock : MonoBehaviour
     public void OnFoodClicked()
     {
         if (currentCell == null) return;
-        
+        if(currentCookedRate > 100) return; // 超过100分，无法点击
         
         GameUIManager.Instance.AddScore(CalculateScore());
 
@@ -113,8 +113,8 @@ public class FoodBlock : MonoBehaviour
     }
     private void BecomeBurnt()
     {
-        isBurnt = true;
-        currentCookedRate = -10000; // 可选，标记为焦炭
+        //isBurnt = true;
+        //currentCookedRate = -10000; // 可选，标记为焦炭
         if (burntSprite != null)
         {
             sr.sprite = burntSprite;
