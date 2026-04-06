@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 11908dfe6622cb645a9d9d388171f9fb, type: 3}
-  m_Name: FoodData_Eggplant
+  m_Name: FoodData_Apple
   m_EditorClassIdentifier: 
-  foodName: Eggplant
-  foodSprite: {fileID: 21300000, guid: b8678eee370e4364abd3eb7ac1f295e9, type: 3}
-  stageOneScore: 4
-  stageTwoScore: 5
-  stageThreeScore: 6
-  stageFourScore: 2
+  foodName: Apple
+  foodSprite: {fileID: 21300000, guid: 0b8b659fc97fec1469f58cd03c675956, type: 3}
+  stageOneScore: 0
+  stageTwoScore: 0
+  stageThreeScore: 0
+  stageFourScore: 0

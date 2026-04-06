@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FoodData_Potato
   m_EditorClassIdentifier: 
   foodName: Potato
-  foodSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  foodSprite: {fileID: 21300000, guid: 8ba7b4a1c189ac94d87f3de174895029, type: 3}
   stageOneScore: 2
   stageTwoScore: 3
   stageThreeScore: 4
