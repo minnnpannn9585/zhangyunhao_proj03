@@ -5,22 +5,34 @@ public class PotGridManager : MonoBehaviour
 {
     public static PotGridManager Instance;
 
-    [Header("网格配置")]
-    public int gridWidth = 8;
+    [Header("网格配置")] public int gridWidth = 8;
     public int gridHeight = 10;
     public Vector2 gridStartPos;
     public float cellSize = 1f;
     public PotGridCell cellPrefab;
 
-    [Header("食物配置")]
-    public FoodBlock foodPrefab;
-    public List<FoodData> spawnData;
+    [Header("食物配置")] public FoodBlock foodPrefab;
+
+    //public List<FoodData> spawnData;
     public float spawnInterval = 2f;
     public float fallSpeed = 1f;
+
+    [Header("食材池配置")] public List<FoodData> allFoodList = new List<FoodData>(); // 全部食材列表 
+    public List<FoodData> initialSpawnPool = new List<FoodData>(); // 初始生成池 
+    public int spawnPoolMaxSize = 6; //生成池总长度上限 [Header("解锁配置")]
+    public List<int> unlockScoreThresholds = new List<int> { 50, 120, 220 };
+    public FoodUnlockUI unlockUI;
 
     private PotGridCell[,] gridCells;
     public List<FoodBlock> fallingFoods = new List<FoodBlock>();
     private float spawnTimer;
+
+    // 按加入顺序维护，便于超长时移除最早食材 
+    private readonly List<FoodData> spawnPool = new List<FoodData>();
+    private int nextUnlockThresholdIndex = 0;
+    private bool isWaitingUnlockChoice = false;
+    public IReadOnlyList<FoodData> CurrentSpawnPool => spawnPool;
+    private bool isPausedByUnlockUI = false;
 
     private void Awake()
     {
@@ -28,6 +40,7 @@ public class PotGridManager : MonoBehaviour
         else Destroy(gameObject);
 
         InitGrid();
+        InitSpawnPool();
     }
 
     private void Start()
@@ -47,8 +60,113 @@ public class PotGridManager : MonoBehaviour
             SpawnFood();
         }
     }
+    
+    private void OnDestroy()
+    {
+        // 防止对象销毁时仍保持暂停 if (isPausedByUnlockUI)
+        {
+            Time.timeScale =1f;
+            isPausedByUnlockUI = false;
+        }
+    }
+    
+    private void PauseGameForUnlockUI()
+    {
+        if (isPausedByUnlockUI) return;
+        Time.timeScale =0f;
+        isPausedByUnlockUI = true;
+    }
 
-    private void HandleMouseClick()
+    private void ResumeGameFromUnlockUI()
+    {
+        if (!isPausedByUnlockUI) return;
+        Time.timeScale =1f;
+        isPausedByUnlockUI = false;
+    }
+
+    private void InitSpawnPool()
+    {
+        spawnPool.Clear();
+
+        // 使用初始生成池 
+        foreach (var food in initialSpawnPool)
+        {
+            AddFoodToSpawnPool(food);
+        }
+
+        //兜底：避免池子为空 
+        if (spawnPool.Count == 0 && allFoodList.Count > 0)
+        {
+            AddFoodToSpawnPool(allFoodList[0]);
+        }
+    }
+
+    public void TryOpenUnlockByScore(int totalScore)
+    {
+        if (isWaitingUnlockChoice) return;
+        if (nextUnlockThresholdIndex >= unlockScoreThresholds.Count) return;
+        if (totalScore < unlockScoreThresholds[nextUnlockThresholdIndex]) return;
+
+        List<FoodData> options = BuildUnlockOptions(3);
+
+        // 即使无可选项，也视为该阈值已处理，避免重复触发 
+        nextUnlockThresholdIndex++;
+
+        if (options.Count == 0 || unlockUI == null) return;
+
+        isWaitingUnlockChoice = true;
+        PauseGameForUnlockUI();
+        unlockUI.ShowUnlockOptions(options, OnUnlockSelected);
+    }
+
+    private List<FoodData> BuildUnlockOptions(int count)
+    {
+        List<FoodData> candidates = new List<FoodData>();
+        foreach (var food in allFoodList)
+        {
+            if (food == null) continue;
+            if (spawnPool.Contains(food)) continue;
+            candidates.Add(food);
+        }
+
+        // 打乱后取前 count 个 
+        for (int i = candidates.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (candidates[i], candidates[j]) = (candidates[j], candidates[i]);
+        }
+
+        if (candidates.Count > count)
+        {
+            candidates.RemoveRange(count, candidates.Count - count);
+        }
+
+        return candidates;
+    }
+
+    private void OnUnlockSelected(FoodData selectedFood)
+    {
+        AddFoodToSpawnPool(selectedFood);
+        isWaitingUnlockChoice = false;
+        ResumeGameFromUnlockUI();
+    }
+
+    private void AddFoodToSpawnPool(FoodData food)
+    {
+        if (food == null) return;
+        if (spawnPool.Contains(food)) return;
+
+        spawnPool.Add(food);
+
+        while (spawnPool.Count > spawnPoolMaxSize)
+        {
+            spawnPool.RemoveAt(0);
+                
+        }
+    }
+
+
+private void HandleMouseClick()
     {
         if (Input.GetMouseButtonDown(0))
         {
@@ -95,39 +213,35 @@ public class PotGridManager : MonoBehaviour
                 {
                     cell.cookSpeed = 1;
                 }
-                    gridCells[x, y] = cell;
+                gridCells[x, y] = cell;
             }
         }
     }
 
     private void SpawnFood()
     {
-        if (spawnData.Count == 0) return;
+        if (spawnPool.Count ==0) return;
 
-        // 随机选择一个食物数据
-        FoodData randomFoodData = spawnData[Random.Range(0, spawnData.Count)];
+        FoodData randomFoodData = spawnPool[Random.Range(0, spawnPool.Count)];
 
-        // 创建食物实例
         FoodBlock newFood = Instantiate(foodPrefab);
         newFood.foodData = randomFoodData;
 
-        // 设置食物的外观
         SpriteRenderer foodRenderer = newFood.GetComponent<SpriteRenderer>();
         if (foodRenderer != null && randomFoodData.foodSprite != null)
         {
             foodRenderer.sprite = randomFoodData.foodSprite;
         }
 
-        // 设置食物初始位置
         int randomX = Random.Range(0, gridWidth);
-        Vector2 spawnPosition = gridStartPos + new Vector2(randomX * cellSize, (gridHeight -1)  * cellSize);
+        Vector2 spawnPosition = gridStartPos + new Vector2(randomX * cellSize, (gridHeight -1) * cellSize);
         newFood.transform.position = spawnPosition;
-        gridCells[randomX, gridHeight-1].SetFood(newFood);
+        gridCells[randomX, gridHeight -1].SetFood(newFood);
 
-        // 设置食物为正在下落状态
-        newFood.fallTimer = 0f;
+        newFood.fallTimer =0f;
         fallingFoods.Add(newFood);
     }
+    
 
     private void HandleFoodFalling()
     {

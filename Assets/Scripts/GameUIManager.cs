@@ -9,7 +9,8 @@ public class GameUIManager : MonoBehaviour
     public TextMeshProUGUI scoreText; // 显示玩家得分
     public TextMeshProUGUI foodInfoText; // 显示场上所有食物及成熟度
     
-    private int totalScore = 0;
+    private int totalScore =0;
+    public int TotalScore => totalScore;
     
     private void Awake()
     {
@@ -25,18 +26,21 @@ public class GameUIManager : MonoBehaviour
 
     public void AddScore(int score)
     {
-        print(score);
+        //print(score);
         totalScore += score;
         UpdateScoreText();
+        
+        if (PotGridManager.Instance != null)
+        {
+            PotGridManager.Instance.TryOpenUnlockByScore(totalScore);
+        }
     }
 
     private void UpdateScoreText()
     {
         scoreText.text = $"Score: {totalScore}";
     }
-
     
-
     public void UpdateFoodInfo()
     {
         StringBuilder sb = new StringBuilder();

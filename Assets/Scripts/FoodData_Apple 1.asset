@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 11908dfe6622cb645a9d9d388171f9fb, type: 3}
-  m_Name: FoodData_Apple
+  m_Name: FoodData_Apple 1
   m_EditorClassIdentifier: 
   foodName: Apple
   foodSprite: {fileID: 21300000, guid: db2425f98b2c48548a474c86bdce999c, type: 3}
-  stageOneScore: 1
-  stageTwoScore: 5
-  stageThreeScore: 10
-  stageFourScore: 15
+  stageOneScore: 0
+  stageTwoScore: 0
+  stageThreeScore: 0
+  stageFourScore: 0
   DropSpeed: 0
