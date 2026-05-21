@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foodName: Apple
   foodSprite: {fileID: 21300000, guid: db2425f98b2c48548a474c86bdce999c, type: 3}
-  stageOneScore: 0
-  stageTwoScore: 0
-  stageThreeScore: 0
-  stageFourScore: 0
-  DropSpeed: 0
+  stageOneScore: 1
+  stageTwoScore: 5
+  stageThreeScore: 10
+  stageFourScore: 15
+  delay: 1.1
+  cookRate: 1

@@ -40,10 +40,15 @@ public class FoodBlock : MonoBehaviour
             maturityTimer += Time.deltaTime;
             if (maturityTimer >= maturityIncreaseInterval)
             {
-                currentCookedRate += currentCell.cookSpeed;
+                currentCookedRate += currentCell.cookSpeed* foodData.cookRate;
                 maturityTimer = 0f;
                 GameUIManager.Instance.UpdateFoodInfo(); // 更新场上食物信息
             }
+        }
+        // 超过100变为焦炭
+        if (!isBurnt && currentCookedRate > 100)
+        {
+            BecomeBurnt();
         }
     }
 
@@ -104,7 +109,7 @@ public class FoodBlock : MonoBehaviour
         {
             return foodData.stageTwoScore; // 阶段二得分
         }
-        else if (currentCookedRate >= 1)
+        else if (currentCookedRate >= 0)
         {
             return foodData.stageOneScore; // 阶段一得分
         }
@@ -113,7 +118,7 @@ public class FoodBlock : MonoBehaviour
     }
     private void BecomeBurnt()
     {
-        //isBurnt = true;
+        isBurnt = true;
         //currentCookedRate = -10000; // 可选，标记为焦炭
         if (burntSprite != null)
         {

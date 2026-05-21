@@ -18,3 +18,5 @@ MonoBehaviour:
   stageTwoScore: 3
   stageThreeScore: 4
   stageFourScore: 5
+  delay: 1
+  cookRate: 1.5

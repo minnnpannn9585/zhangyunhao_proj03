@@ -105,7 +105,7 @@ MonoBehaviour:
   maturityIncreaseInterval: 0.1
   fallTimer: 1
   isBurnt: 0
-  burntSprite: {fileID: 0}
+  burntSprite: {fileID: 7482667652216324306, guid: 46cf5059c59c81f4091cbbc367a6d453, type: 3}
 --- !u!61 &2818223667224482914
 BoxCollider2D:
   m_ObjectHideFlags: 0
